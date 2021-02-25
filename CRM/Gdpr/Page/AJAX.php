@@ -46,10 +46,10 @@ class CRM_Gdpr_Page_AJAX {
    */
   public static function get_address_logs($contactId) {
 
-    $aGetMemberships = array();
+    $aGetAddressHistory = array();
 
     if (empty($contactId)) {
-      return $aGetMemberships;
+      return $aGetAddressHistory;
     }
 
     // Get logging DB
@@ -73,11 +73,10 @@ ORDER BY lca.log_date DESC";
     while ($dao->fetch()) {
       $country = empty($dao->country_id) ? NULL : CRM_Core_PseudoConstant::country($dao->country_id);
       $county = empty($dao->county_id) ? NULL : CRM_Core_PseudoConstant::county($dao->county_id);
-      $aGetMemberships[] = array(
+      $aGetAddressHistory[] = array(
         'street'        => $dao->street_address,
         'location_type' => $dao->lt_name,
         'postal_code'   => $dao->postal_code,
-        'country'       => $country,
         'line1'         => $dao->supplemental_address_1,
         'line2'         => $dao->supplemental_address_2,
         'line3'         => $dao->supplemental_address_3,
@@ -85,10 +84,10 @@ ORDER BY lca.log_date DESC";
         'country'       => $country,
         'county'        => $county,
         'log_action'    => $dao->log_action,
-        'log_date'      => CRM_Utils_Date::customFormat($dao->log_date, '%d-%m-%Y'),
+        'log_date'      => $dao->log_date,
       );
     }
-    return $aGetMemberships;
+    return $aGetAddressHistory;
   }
 
   public static function get_address_history_table($data) {
@@ -124,7 +123,7 @@ TABLE;
 
     foreach ($data as $row) {
       $table .= "<tr> ";
-      $table .= "<td valign='top'> " . $row['log_date'] . "</td> ";
+      $table .= "<td valign='top' data-order=" . strtotime($row['log_date']) . "> " . CRM_Utils_Date::customFormat($row['log_date'], '%d-%m-%Y') . "</td> ";
       $table .= "<td valign='top'> " . $row['log_action'] . "</td> ";
       $table .= "<td valign='top'> " . $row['location_type'] . "</td> ";
       $table .= "<td valign='top'> " . $row['street'];
